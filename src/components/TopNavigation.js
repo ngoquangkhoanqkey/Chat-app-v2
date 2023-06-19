@@ -56,29 +56,12 @@ function TopNavigation(props) {
         <div className='top-navigation'>
             <div className='topnav-wrapper'>
                 <div className='topnav'>
-                    <div className='topnav__left-section'>
-                        <div className='topnav__quick-menu'>
-                            <span className='topnav__logo'>
-                                <span className='logo-wrapper'>
-                                    <img className='logo' src={appLogo} alt='' draggable={false}></img>
-                                </span>
-                            </span>
-                            <span className='topnav__app-name'>
-                                <TextWithEffect text="MyChatApp"></TextWithEffect>
-                            </span>
-                            {/* <div className='search-box-wrapper'>
-                                <div className='search-box--primary'>
-                                    <FontAwesomeIcon className='search-box__icon' icon={faSearch} />
-                                    <input className='search-box__input' type='text' placeholder='Tìm kiếm trên App'></input>
-                                </div>
-                            </div> */}
-                        </div>
-                    </div>
+                   
 
-                    <div className='topnav__mid-section'>
+                    {/* <div className='topnav__mid-section'>
                         <div className='app-menu'>
                         </div>
-                    </div>
+                    </div> */}
 
                     <div className='topnav__right-section'>
                         <div className='main-menu'>
