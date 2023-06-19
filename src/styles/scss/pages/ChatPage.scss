@@ -1,0 +1,110 @@
+.chatpage {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: hidden;
+    height: calc(100vh - 59.56px);
+    position: relative;
+
+    &__left-section {
+        // position: relative;
+        min-width: 360px;
+    }
+
+    &__mid-section {
+        // position: relative;
+        width: 100%;
+        border-left: 1px solid rgb(230, 230, 230);
+        border-right: 1px solid rgb(230, 230, 230);
+    }
+
+    &__right-section {
+        // position: relative;
+        min-width: 0;
+        width: 0;
+        opacity: 0;
+        visibility: hidden;
+        transition: min-width 0.3s ease;
+        overflow: auto;
+    }
+
+    input#checkbox-for-chatroom-menu {
+        display: none;
+    }
+
+    input#checkbox-for-chatroom-menu:checked ~ &__right-section {
+        min-width: 300px;
+        opacity: 1;
+        visibility: visible;
+        transition: min-width 0.3s ease, opacity 0s ease 0.3s;
+    }
+}
+
+
+/* Responsive design:*/
+@media screen and (max-width: 576px) {
+
+    .chatpage {
+        width: 100vw;
+        min-width: 100vw;
+        max-width: 100vw;
+        
+        &__left-section {
+            min-width: auto;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            z-index: 1;
+        }
+
+        &__mid-section {
+            position: absolute;
+            top: 0;
+            left: 100%;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            z-index: 2;
+            transition: all 0.3s ease;
+
+            &.hidden-for-small-devices {
+                left: 100%;
+            }
+
+            &.visible-for-small-devices {
+                left: 0;
+            }
+        }
+
+        &__right-section {
+            position: absolute;
+            top: 0;
+            left: 100%;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            z-index: 3;
+            transition: all 0.3s ease;
+            // Others:
+            min-width: 100%;
+            opacity: 1;
+            visibility: visible;
+
+            &.hidden-for-small-devices {
+                left: 100%;
+            }
+
+            &.visible-for-small-devices {
+                left: 0;
+            }
+        }
+
+        input#checkbox-for-chatroom-menu:checked ~ .chatpage__right-section {
+            transition: all 0.3s ease;
+        }
+    }
+}

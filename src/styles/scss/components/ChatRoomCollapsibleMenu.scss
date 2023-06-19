@@ -1,0 +1,96 @@
+.collapsible-menu-wrapper.for-chatroom-menu {
+    user-select: none;
+
+    .option {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: nowrap;
+        flex-direction: row;
+        padding: 10px 8px;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+    
+        &:hover {
+            background-color: #eee;
+        }
+
+        &__icon {
+            display: block;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+    
+        &__title {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex-wrap: nowrap;
+            flex-direction: row;
+        }
+    }
+
+    .inline-menu-wrapper {
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        // display: none;
+        // font-size: 0;
+        opacity: 0;
+        visibility: hidden;
+        max-height: 0;
+        height: 0;
+    }
+
+    .option-list__item.active {
+        .option__icon {
+            transform: rotateZ(-180deg);
+        }
+
+        .inline-menu-wrapper {
+            // display: block;
+            // font-size: 14px;
+            opacity: 1;
+            visibility: visible;
+            max-height: 100vh;
+            // height: 250px;
+        }
+    }
+
+    .inline-menu {
+        display: block;
+
+        // Option:
+        &__option {
+            background-color: #f9f9f9;
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+
+            &:hover {
+                background-color: #eee;
+            }
+
+            &.is-disabled {
+                cursor: auto;
+                color: #aaa;
+            }
+
+            &.is-disabled:hover {
+                background-color: #f9f9f9;
+            }
+        }
+
+        &__option-icon-wrapper {
+            margin-right: 8px;
+        }
+
+        &__option-icon {
+            display: block;
+            font-size: 18px;
+        }
+    }
+}

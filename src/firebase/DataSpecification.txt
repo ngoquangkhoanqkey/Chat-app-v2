@@ -1,0 +1,66 @@
+COLLECTIONS:
+
+1. users:
+All fields:
+- createdAt (timestamp)
+- displayName (string)
+- email (string)
+- photoURL (string)
+- providerId (string)
+- uid (string)
+- phoneNumber (string)
+- gender (string)
+- displayNameSearchKeywords (array)
+
+2. rooms (A room object represents a chat room information):
+All fields:
+- createdAt (timestamp)
+- lastActiveAt (timestamp)
+- name (string)
+- description (string)
+- state (string)
+- members (array): List of uids.
+- membersAddedBy (array): List of uids.
+- membersRole (array): List of role, they are: 'group-admin', 'group-member'.
+- type (string): 'self-chat', 'one-to-one-chat', 'group-chat'.
+- fromOthers_BgColor (string)
+- fromMe_BgColor (string)
+- latestMessage (string)
+- isSeenBy (array): List of uids.
+
+
+3. messages (A message object represents a message of a chat room):
+All fields:
+- createdAt (timestamp)
+- roomId (string)
+- content (string)
+- uid (string)
+
+
+4. friends (A user's list of friends):
+All fields:
+- uid (string)
+- friends (array): List of uids.
+- friendsFrom (array): List of timestamps.
+
+
+5. notificationsForFriendRequests:
+All fields:
+- users (array): List of uids (People who are involved in a friend request).
+- createdAt (timestamp)
+- senderUID (string)
+- receiverUID (string)
+- senderSeen (boolean)
+- receiverSeen (boolean)
+- state (string): 'accepted', 'refused', 'pending'.
+
+
+6. notificationsForOthers:
+- users (array): List of uids (People who will receive this notification).
+- createdAt (timestamp)
+- createdBy (uid)
+- type (string): 'be-added-to-a-group-chat'.
+- isSeenBy (array): List of uids.
+- objectType (string): 'group-chat',
+- objectID (string)
+Use this property if there is only an object, it means that the notification is about a person, an event,...

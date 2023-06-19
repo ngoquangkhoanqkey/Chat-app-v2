@@ -1,0 +1,13 @@
+// Modal & forms:
+.modal-invite-member {
+    display: none;
+}
+
+
+.antd-modal-invite-member {
+
+    .ant-select-multiple .ant-select-selection-item {
+        height: auto;
+        align-items: center;
+    }
+}

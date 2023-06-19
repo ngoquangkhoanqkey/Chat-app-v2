@@ -1,0 +1,19 @@
+How to set up Firebase Emulator for local development?
+
+Open Command Prompt (cmd) and run:
+1)
+    npm i -g firebase-tools
+2)
+    firebase login
+    firebase init
+        Select Firebase features:
+        - Emulators: Set up local emulators for Firebase products.
+        - Firestore: Configure security rules and indexes files for Firestore.
+        Select Firebase emulators:
+        - Authentication Emulator.
+        - Firestore Emulator.
+        Auth emulator PORT: 9099.
+        Firestore emulator PORT: 8080.
+3)
+    cd emulators
+    firebase emulators:start
