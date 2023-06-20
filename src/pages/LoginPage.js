@@ -138,7 +138,7 @@ function LoginPage(props) {
               <div className='form_logo-wrapper'>
                 <img className='form_logo' src={Logo} alt="" />
               </div>
-              <h1 className='form_title'>Đăng nhập vào ứng dụng</h1>
+              <h1 className='form_title'>Đăng nhập với</h1>
             </div>
   
             {/* Provider */}

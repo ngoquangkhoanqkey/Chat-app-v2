@@ -23,6 +23,7 @@
       .form_logo-wrapper {
         text-align: center;
       }
+     
     }
   }
   
@@ -38,7 +39,7 @@
   
   .form_title {
     margin-top: 42px;
-    font-size: 2.2rem;
+    font-size: 1.7rem;
     text-align: center;
     margin-top: 42px;
     text-align: center;
@@ -79,10 +80,11 @@
     height: 100%;
   }
   
-  .form_cool-img {
-    width: 100%;
-    height: 100%;
-    border-radius: 12px 0 0 12px;
-    background: no-repeat center/cover
-      url("../../../assets/images/background1.jpg");
-  }
+   .form_cool-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 12px 0 0 12px;
+        background: no-repeat center/cover
+          url("../../../assets/images/background1.jpg");
+      }
+  
