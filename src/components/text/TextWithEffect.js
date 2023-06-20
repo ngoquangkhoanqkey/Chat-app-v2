@@ -4,7 +4,8 @@ import React from 'react';
 import '../../styles/scss/components/TextWithEffect.scss';
 
 
-function TextWithEffect(props) {
+function 
+TextWithEffect(props) {
     /**
      * Props:
      * Values for type: "" || "default".
