@@ -24,9 +24,12 @@
             }
         }
 
+        &dark {
+            background: #000;
+        }
+
         &__item.is-disabled {
-            cursor: auto;
-            color: #aaa;
+            cursor: pointer;
 
             &:hover {
                 background-color: transparent;
@@ -39,7 +42,7 @@
         }
         
         &__icon-wrapper {
-            background-color: #e4e6eb;
+           
             border-radius: 50%;
             display: flex;
             justify-content: center;
