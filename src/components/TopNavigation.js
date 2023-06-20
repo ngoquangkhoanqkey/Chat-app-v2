@@ -6,8 +6,6 @@ import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
 import TopNavButtonForFriendRequest from "./TopNavButtonForFriendRequest";
 import TopNavButtonForNotification from "./TopNavButtonForNotification";
 import OptionListMenu from "./OptionListMenu";
-import TextWithEffect from "./text/TextWithEffect";
-
 // Firebase:
 import { auth, signOut } from "../firebase/config";
 
@@ -117,17 +115,6 @@ function TopNavigation(props) {
                     <div className="dropdown-menu__title">
                       Facebook Messenger Clone
                     </div>
-                    <div className="dropdown-menu__label">
-                      View source on GitHub:
-                    </div>
-                    <a
-                      className="dropdown-menu__link"
-                      href="https://github.com/npl3010/chat-app"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <span>github.com/npl3010/chat-app</span>
-                    </a>
                   </div>
                 </div>
               </div>

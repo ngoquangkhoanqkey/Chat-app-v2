@@ -376,7 +376,7 @@ function ChatMenu(props) {
         <div className='chatmenu'>
             <div className='chatmenu__header'>
                 <div className='chatmenu__actions'>
-                    <div className='title'>Chats</div>
+                    <div className='title'>Chat</div>
 
                     <div className='action-list'>
                         <div className='action-item action-button more-options-btn'>
@@ -421,7 +421,7 @@ function ChatMenu(props) {
                                     <input
                                         className='search-box__input'
                                         type='text'
-                                        placeholder='Tìm trong danh bạ'
+                                        placeholder='Tìm kiếm trên chat app'
                                         onFocus={(e) => handleFocusSearchBox(e)}
                                         onChange={(e) => handleSearchInputChange(e)}
                                     ></input>

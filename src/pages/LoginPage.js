@@ -18,6 +18,7 @@ import { addDocument, addDocumentWithoutTimestamp, generateUserNameKeywords } fr
 import '../styles/scss/pages/LoginPage.scss';
 
 // Assets:
+import Logo from '../assets/images/logo-full.png'
 import fbIcon from '../assets/images/icon_Facebook.png';
 import ggIcon from '../assets/images/icon_Google.png';
 
@@ -135,7 +136,7 @@ function LoginPage(props) {
             {/* Header */}
             <div className='form_header'>
               <div className='form_logo-wrapper'>
-                <img className='form_logo' alt="" />
+                <img className='form_logo' src={Logo} alt="" />
               </div>
               <h1 className='form_title'>Đăng nhập vào ứng dụng</h1>
             </div>
