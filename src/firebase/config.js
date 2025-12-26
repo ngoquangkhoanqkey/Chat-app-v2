@@ -3,6 +3,14 @@ import { initializeApp } from "firebase/app";
 
 import { getAnalytics } from "firebase/analytics";
 
+//  module.exports = {
+//    devServer: {
+//      headers: {
+//        'Cross-Origin-Embedder-Policy': 'unsafe-none'
+//      }
+//    }
+//  }
+
 import {
   getAuth,
   signInWithPopup,

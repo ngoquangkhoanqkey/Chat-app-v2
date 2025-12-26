@@ -95,6 +95,7 @@ function TextTypingEffect(props) {
 
     return (
         <>
+       
             {renderTextTypingEffect()}
         </>
     );

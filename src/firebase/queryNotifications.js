@@ -43,13 +43,17 @@ export async function updateNotificationVisibleToUsers(roomID, listOfUserIDs = [
 
         const querySnapshot = await getDocs(q);
 
-        querySnapshot.forEach(async (doc) => {
+        const updatePromises = [];
+        querySnapshot.forEach((doc) => {
             // Preparation:
             const newUsers = [...doc.data().users, ...listOfUserIDs];
             // Update data:
-            await updateDoc(doc.ref, {
+            updatePromises.push(updateDoc(doc.ref, {
                 users: newUsers
-            });
+            }));
         });
+
+        // Wait for all updates to complete:
+        await Promise.all(updatePromises);
     }
 }

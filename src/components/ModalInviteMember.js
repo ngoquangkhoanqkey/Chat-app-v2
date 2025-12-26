@@ -138,8 +138,8 @@ function ModalInviteMember(props) {
                     membersAddedBy: newMembersAddedBy,
                     membersRole: newmembersRole
                 })
-                    .then((res) => {
-                        updateNotificationVisibleToUsers(rooms[indexOfRoom].id, [...value.map((val) => val)]);
+                    .then(async (res) => {
+                        await updateNotificationVisibleToUsers(rooms[indexOfRoom].id, [...value.map((val) => val)]);
                     });
 
                 // Clear form:

@@ -17,6 +17,7 @@ import '../styles/scss/components/ChatRoom.scss';
 
 // Custom hooks:
 import useFirestore from "../customHooks/useFirestore";
+import { setLogLevel } from 'firebase/app';
 
 
 function ChatRoom(props) {
@@ -121,6 +122,12 @@ function ChatRoom(props) {
         dispatch(clearSelectedRoom());
         setIsChatRoomMenuDisplayed(false);
     }
+
+    //Get info usser
+    // const MessEditUser = useMemo(()=>{
+    //     const editUser = (selectedChatRoomUsers !== '' && selectedChatRoomID < 1 )? setLogLevel:
+        
+    // })
 
 
     // Hooks:
