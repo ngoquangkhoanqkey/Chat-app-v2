@@ -65,6 +65,11 @@ function ChatPage(props) {
                             ></ChatRoom>
                         </div>
 
+                        <div className='nameout'>
+                            setFetching(false);
+                        
+                        </div>
+
                         <input
                             id="checkbox-for-chatroom-menu"
                             type="checkbox"
@@ -86,6 +91,7 @@ function ChatPage(props) {
             <ModalSearchUserForm></ModalSearchUserForm>
             <ModalInviteMember></ModalInviteMember>
             <ModalAddGroupChat></ModalAddGroupChat>
+            
         </div>
     );
 }

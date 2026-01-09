@@ -1,4 +1,4 @@
-import { db, collection, doc, getDoc, addDoc, updateDoc, serverTimestamp } from '../firebase/config';
+import { db, collection, doc, getDoc, addDoc, updateDoc, deleteDoc, serverTimestamp, storage, ref, uploadBytesResumable, getDownloadURL } from '../firebase/config';
 import formatRelative from 'date-fns/formatRelative'
 
 
@@ -79,6 +79,28 @@ export const updateDocumentByIDWithTimestamps = async (collectionName, docID, da
         await updateDoc(docSnapshot.ref, {
             ...data,
             ...timestamps,
+        });
+    }
+
+    return docRef;
+}
+
+
+// Update a document by its ID without timestamps:
+/**
+ * 
+ * @param {string} collectionName Name of collection.
+ * @param {string} docID Id of a document.
+ * @param {Object} data Updated data to be inserted.
+ * @returns 
+ */
+export const updateDocumentByID = async (collectionName, docID, data) => {
+    const docRef = doc(db, collectionName, docID);
+    const docSnapshot = await getDoc(docRef);
+
+    if (docSnapshot.exists()) {
+        await updateDoc(docSnapshot.ref, {
+            ...data,
         });
     }
 
@@ -215,4 +237,96 @@ export const formatDateTimeFromDateString = (dateString) => {
         result = result.charAt(0).toUpperCase() + result.slice(1);
     }
     return result;
+}
+
+
+// Upload video to Firebase Storage:
+/**
+ * 
+ * @param {File} videoFile Video file to upload
+ * @param {string} userId User ID of the uploader
+ * @param {Function} onProgress Callback function for upload progress (optional)
+ * @returns {Promise<string>} Download URL of the uploaded video
+ */
+export const uploadVideoToStorage = async (videoFile, userId, onProgress = null) => {
+    return new Promise((resolve, reject) => {
+        try {
+            // Create a unique filename
+            const timestamp = Date.now();
+            const fileName = `${timestamp}_${videoFile.name}`;
+            const storageRef = ref(storage, `videos/${userId}/${fileName}`);
+
+            // Upload file
+            const uploadTask = uploadBytesResumable(storageRef, videoFile);
+
+            uploadTask.on(
+                'state_changed',
+                (snapshot) => {
+                    // Track upload progress
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    if (onProgress) {
+                        onProgress(progress);
+                    }
+                },
+                (error) => {
+                    // Handle upload error
+                    console.error('Upload error:', error);
+                    reject(error);
+                },
+                async () => {
+                    // Upload completed successfully, get download URL
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    resolve(downloadURL);
+                }
+            );
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+
+// Upload image to Firebase Storage:
+/**
+ * 
+ * @param {File} imageFile Image file to upload
+ * @param {string} userId User ID of the uploader
+ * @param {Function} onProgress Callback function for upload progress (optional)
+ * @returns {Promise<string>} Download URL of the uploaded image
+ */
+export const uploadImageToStorage = async (imageFile, userId, onProgress = null) => {
+    return new Promise((resolve, reject) => {
+        try {
+            // Create a unique filename
+            const timestamp = Date.now();
+            const fileName = `${timestamp}_${imageFile.name}`;
+            const storageRef = ref(storage, `images/${userId}/${fileName}`);
+
+            // Upload file
+            const uploadTask = uploadBytesResumable(storageRef, imageFile);
+
+            uploadTask.on(
+                'state_changed',
+                (snapshot) => {
+                    // Track upload progress
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    if (onProgress) {
+                        onProgress(progress);
+                    }
+                },
+                (error) => {
+                    // Handle upload error
+                    console.error('Upload error:', error);
+                    reject(error);
+                },
+                async () => {
+                    // Upload completed successfully, get download URL
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    resolve(downloadURL);
+                }
+            );
+        } catch (error) {
+            reject(error);
+        }
+    });
 }

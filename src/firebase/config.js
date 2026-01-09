@@ -41,6 +41,13 @@ import {
   limit,
 } from "firebase/firestore";
 
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+
 // Web app's Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -58,6 +65,7 @@ const analytics = getAnalytics(app);
 // Setup:
 const auth = getAuth();
 const db = getFirestore();
+const storage = getStorage();
 const fb_provider = new FacebookAuthProvider();
 const gg_provider = new GoogleAuthProvider();
 
@@ -90,4 +98,8 @@ export {
   where,
   orderBy,
   limit,
+  storage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
 };

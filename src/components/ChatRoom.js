@@ -1,16 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAngleRight, faExclamation, faUser, faInfo, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faAngleRight, faExclamation, faUser, faInfo, faArrowLeft, faVideo, faImage, faFileVideo, faPaperclip } from '@fortawesome/free-solid-svg-icons';
 
 // Components:
 import AvatarGroup from './AvatarGroup';
+import VideoChat from './VideoChat';
 
 // Redux:
 import { useDispatch, useSelector } from 'react-redux';
 import { clearSelectedRoom, setRoomIDWillBeSelected } from '../features/manageRooms/manageRoomsSlice';
 
 // Services:
-import { addDocument, addDocumentWithTimestamps, formatDateTimeFromDateString, updateDocumentByIDWithTimestamps } from '../firebase/services';
+import { addDocument, addDocumentWithTimestamps, formatDateTimeFromDateString, updateDocumentByIDWithTimestamps, uploadVideoToStorage, uploadImageToStorage } from '../firebase/services';
 
 // CSS:
 import '../styles/scss/components/ChatRoom.scss';
@@ -25,11 +26,16 @@ function ChatRoom(props) {
         setIsChatRoomMenuDisplayed
     } = props;
     const messagesEndRef = useRef(null);
+    const videoInputRef = useRef(null);
+    const imageInputRef = useRef(null);
 
 
     // State:
     const [roomData, setRoomData] = useState({});
     const [inputMessage, setInputMessage] = useState('');
+    const [isVideoChatOpen, setIsVideoChatOpen] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [isUploading, setIsUploading] = useState(false);
 
 
     // Redux:
@@ -122,6 +128,131 @@ function ChatRoom(props) {
         dispatch(clearSelectedRoom());
         setIsChatRoomMenuDisplayed(false);
     }
+
+    const handleVideoUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('video/')) {
+            alert('Vui lòng chọn file video!');
+            return;
+        }
+
+        // Validate file size (max 100MB)
+        const maxSize = 100 * 1024 * 1024; // 100MB
+        if (file.size > maxSize) {
+            alert('File quá lớn! Vui lòng chọn file nhỏ hơn 100MB.');
+            return;
+        }
+
+        try {
+            setIsUploading(true);
+            setUploadProgress(0);
+
+            // Upload video to Firebase Storage
+            const videoURL = await uploadVideoToStorage(file, user.uid, (progress) => {
+                setUploadProgress(progress);
+            });
+
+            // Send message with video URL
+            await sendMediaMessage(videoURL, 'video');
+
+            // Reset
+            setIsUploading(false);
+            setUploadProgress(0);
+            e.target.value = null;
+        } catch (error) {
+            console.error('Error uploading video:', error);
+            alert('Lỗi khi tải video lên. Vui lòng thử lại!');
+            setIsUploading(false);
+            setUploadProgress(0);
+        }
+    };
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Vui lòng chọn file hình ảnh!');
+            return;
+        }
+
+        // Validate file size (max 10MB)
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.size > maxSize) {
+            alert('File quá lớn! Vui lòng chọn file nhỏ hơn 10MB.');
+            return;
+        }
+
+        try {
+            setIsUploading(true);
+            setUploadProgress(0);
+
+            // Upload image to Firebase Storage
+            const imageURL = await uploadImageToStorage(file, user.uid, (progress) => {
+                setUploadProgress(progress);
+            });
+
+            // Send message with image URL
+            await sendMediaMessage(imageURL, 'image');
+
+            // Reset
+            setIsUploading(false);
+            setUploadProgress(0);
+            e.target.value = null;
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            alert('Lỗi khi tải hình ảnh lên. Vui lòng thử lại!');
+            setIsUploading(false);
+            setUploadProgress(0);
+        }
+    };
+
+    const sendMediaMessage = async (mediaURL, mediaType) => {
+        if (selectedChatRoomID !== '') {
+            if (roomData.state === 'temporary') {
+                // Add data to Cloud Firestore:
+                addDocumentWithTimestamps('rooms', {
+                    id: 'temporary',
+                    name: 'Room\'s name',
+                    description: 'One To One chat',
+                    type: 'one-to-one-chat',
+                    members: roomData.members,
+                    latestMessage: mediaType === 'video' ? '[Video]' : '[Hình ảnh]',
+                    isSeenBy: [user.uid],
+                    fromOthers_BgColor: '',
+                    fromMe_BgColor: '',
+                }, ['createdAt', 'lastActiveAt'])
+                    .then((roomRef) => {
+                        addDocument('messages', {
+                            roomId: roomRef.id,
+                            content: mediaURL,
+                            uid: user.uid,
+                            type: mediaType,
+                        }).then((messageRef) => {
+                            dispatch(setRoomIDWillBeSelected(roomRef.id));
+                        });
+                    });
+            } else {
+                // Add data to Cloud Firestore:
+                addDocument('messages', {
+                    roomId: selectedChatRoomID,
+                    content: mediaURL,
+                    uid: user.uid,
+                    type: mediaType,
+                })
+                    .then((messageRef) => {
+                        updateDocumentByIDWithTimestamps('rooms', selectedChatRoomID, {
+                            latestMessage: mediaType === 'video' ? '[Video]' : '[Hình ảnh]',
+                            isSeenBy: [user.uid]
+                        }, ['lastActiveAt']);
+                    });
+            }
+        }
+    };
 
     //Get info usser
     // const MessEditUser = useMemo(()=>{
@@ -269,15 +400,32 @@ function ChatRoom(props) {
             <>
                 {
                     messages.slice(0).reverse().map((msg, index) => {
+                        const relativeDateTime = formatDateTimeFromDateString(msg.createdAt);
+                        const messageType = msg.type || 'text';
+                        
                         if (msg.uid === user.uid) {
-                            const relativeDateTime = formatDateTimeFromDateString(msg.createdAt);
                             return (
                                 <div key={`msg-${index}`} className='message from-me'>
                                     <div className='message__content'>
-                                        <span className='message-piece'>
-                                            {msg.content}
-                                            <span className='message-piece__tooltip'>{relativeDateTime}</span>
-                                        </span>
+                                        {messageType === 'video' ? (
+                                            <div className='message-media video-message'>
+                                                <video controls className='message-video'>
+                                                    <source src={msg.content} type='video/mp4' />
+                                                    Trình duyệt của bạn không hỗ trợ video.
+                                                </video>
+                                                <span className='message-piece__tooltip'>{relativeDateTime}</span>
+                                            </div>
+                                        ) : messageType === 'image' ? (
+                                            <div className='message-media image-message'>
+                                                <img src={msg.content} alt='Shared image' className='message-image' />
+                                                <span className='message-piece__tooltip'>{relativeDateTime}</span>
+                                            </div>
+                                        ) : (
+                                            <span className='message-piece'>
+                                                {msg.content}
+                                                <span className='message-piece__tooltip'>{relativeDateTime}</span>
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             );
@@ -292,7 +440,6 @@ function ChatRoom(props) {
                             }
 
                             // Return:
-                            const relativeDateTime = formatDateTimeFromDateString(msg.createdAt);
                             return (
                                 <div key={`msg-${index}`} className='message from-others'>
                                     <div className='message__person-img'>
@@ -305,10 +452,25 @@ function ChatRoom(props) {
                                         )}
                                     </div>
                                     <div className='message__content'>
-                                        <span className='message-piece'>
-                                            {msg.content}
-                                            <span className='message-piece__tooltip'>{relativeDateTime}</span>
-                                        </span>
+                                        {messageType === 'video' ? (
+                                            <div className='message-media video-message'>
+                                                <video controls className='message-video'>
+                                                    <source src={msg.content} type='video/mp4' />
+                                                    Trình duyệt của bạn không hỗ trợ video.
+                                                </video>
+                                                <span className='message-piece__tooltip'>{relativeDateTime}</span>
+                                            </div>
+                                        ) : messageType === 'image' ? (
+                                            <div className='message-media image-message'>
+                                                <img src={msg.content} alt='Shared image' className='message-image' />
+                                                <span className='message-piece__tooltip'>{relativeDateTime}</span>
+                                            </div>
+                                        ) : (
+                                            <span className='message-piece'>
+                                                {msg.content}
+                                                <span className='message-piece__tooltip'>{relativeDateTime}</span>
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             );
@@ -331,32 +493,62 @@ function ChatRoom(props) {
         let result = [];
 
         for (let i = 0; i < messageList.length; i++) {
+            const messageType = messageList[i].type || 'text';
+            
             if (messageList[i].uid === user.uid) {
                 let indexSkipTo = i;
-                for (let j = i; j < messageList.length; j++) {
-                    const d1 = new Date(messageList[i].createdAt);
-                    const d2 = new Date(messageList[j].createdAt);
-                    if (messageList[i].uid === messageList[j].uid && Math.abs(d1 - d2) <= 60000) {
-                        const relativeDateTime = formatDateTimeFromDateString(messageList[j].createdAt);
-                        messageGroup.push(
-                            <span key={`msgpiece-${j}`} className='message-piece'>
-                                {messageList[j].content}
-                                <span className='message-piece__tooltip'>{relativeDateTime}</span>
-                            </span>
-                        );
-                        indexSkipTo++;
-                    } else {
-                        break;
-                    }
-                }
-                result.push(
-                    <div key={`msg-${i}`} className='message from-me'>
-                        <div className='message__content'>
-                            {messageGroup.map((msg) => msg)}
+                
+                // Don't group media messages
+                if (messageType === 'video' || messageType === 'image') {
+                    const relativeDateTime = formatDateTimeFromDateString(messageList[i].createdAt);
+                    result.push(
+                        <div key={`msg-${i}`} className='message from-me'>
+                            <div className='message__content'>
+                                {messageType === 'video' ? (
+                                    <div className='message-media video-message'>
+                                        <video controls className='message-video'>
+                                            <source src={messageList[i].content} type='video/mp4' />
+                                            Trình duyệt của bạn không hỗ trợ video.
+                                        </video>
+                                        <span className='message-piece__tooltip'>{relativeDateTime}</span>
+                                    </div>
+                                ) : (
+                                    <div className='message-media image-message'>
+                                        <img src={messageList[i].content} alt='Shared image' className='message-image' />
+                                        <span className='message-piece__tooltip'>{relativeDateTime}</span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                );
-                messageGroup = [];
+                    );
+                } else {
+                    // Group text messages
+                    for (let j = i; j < messageList.length; j++) {
+                        const d1 = new Date(messageList[i].createdAt);
+                        const d2 = new Date(messageList[j].createdAt);
+                        const msgType = messageList[j].type || 'text';
+                        if (messageList[i].uid === messageList[j].uid && Math.abs(d1 - d2) <= 60000 && msgType === 'text') {
+                            const relativeDateTime = formatDateTimeFromDateString(messageList[j].createdAt);
+                            messageGroup.push(
+                                <span key={`msgpiece-${j}`} className='message-piece'>
+                                    {messageList[j].content}
+                                    <span className='message-piece__tooltip'>{relativeDateTime}</span>
+                                </span>
+                            );
+                            indexSkipTo++;
+                        } else {
+                            break;
+                        }
+                    }
+                    result.push(
+                        <div key={`msg-${i}`} className='message from-me'>
+                            <div className='message__content'>
+                                {messageGroup.map((msg) => msg)}
+                            </div>
+                        </div>
+                    );
+                    messageGroup = [];
+                }
                 i = indexSkipTo - 1;
             } else {
                 // Get user data:
@@ -370,39 +562,76 @@ function ChatRoom(props) {
 
                 // Group messages:
                 let indexSkipTo = i;
-                for (let j = i; j < messageList.length; j++) {
-                    const d1 = new Date(messageList[i].createdAt);
-                    const d2 = new Date(messageList[j].createdAt);
-                    if (messageList[i].uid === messageList[j].uid && Math.abs(d1 - d2) <= 60000) {
-                        const relativeDateTime = formatDateTimeFromDateString(messageList[j].createdAt);
-                        messageGroup.push(
-                            <span key={`msgpiece-${j}`} className='message-piece'>
-                                {messageList[j].content}
-                                <span className='message-piece__tooltip'>{relativeDateTime}</span>
-                            </span>
-                        );
-                        indexSkipTo++;
-                    } else {
-                        break;
+                
+                // Don't group media messages
+                if (messageType === 'video' || messageType === 'image') {
+                    const relativeDateTime = formatDateTimeFromDateString(messageList[i].createdAt);
+                    result.push(
+                        <div key={`msg-${i}`} className='message from-others'>
+                            <div className='message__person-img'>
+                                {data?.photoURL ? (
+                                    <img className='person-img' src={data.photoURL} alt='' ></img>
+                                ) : (
+                                    <div className='person-icon-wrapper'>
+                                        <FontAwesomeIcon className='person-icon' icon={faUser} />
+                                    </div>
+                                )}
+                            </div>
+                            <div className='message__content'>
+                                {messageType === 'video' ? (
+                                    <div className='message-media video-message'>
+                                        <video controls className='message-video'>
+                                            <source src={messageList[i].content} type='video/mp4' />
+                                            Trình duyệt của bạn không hỗ trợ video.
+                                        </video>
+                                        <span className='message-piece__tooltip'>{relativeDateTime}</span>
+                                    </div>
+                                ) : (
+                                    <div className='message-media image-message'>
+                                        <img src={messageList[i].content} alt='Shared image' className='message-image' />
+                                        <span className='message-piece__tooltip'>{relativeDateTime}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    );
+                } else {
+                    // Group text messages
+                    for (let j = i; j < messageList.length; j++) {
+                        const d1 = new Date(messageList[i].createdAt);
+                        const d2 = new Date(messageList[j].createdAt);
+                        const msgType = messageList[j].type || 'text';
+                        if (messageList[i].uid === messageList[j].uid && Math.abs(d1 - d2) <= 60000 && msgType === 'text') {
+                            const relativeDateTime = formatDateTimeFromDateString(messageList[j].createdAt);
+                            messageGroup.push(
+                                <span key={`msgpiece-${j}`} className='message-piece'>
+                                    {messageList[j].content}
+                                    <span className='message-piece__tooltip'>{relativeDateTime}</span>
+                                </span>
+                            );
+                            indexSkipTo++;
+                        } else {
+                            break;
+                        }
                     }
+                    result.push(
+                        <div key={`msg-${i}`} className='message from-others'>
+                            <div className='message__person-img'>
+                                {data?.photoURL ? (
+                                    <img className='person-img' src={data.photoURL} alt='' ></img>
+                                ) : (
+                                    <div className='person-icon-wrapper'>
+                                        <FontAwesomeIcon className='person-icon' icon={faUser} />
+                                    </div>
+                                )}
+                            </div>
+                            <div className='message__content'>
+                                {messageGroup.map((msg) => msg)}
+                            </div>
+                        </div>
+                    );
+                    messageGroup = [];
                 }
-                result.push(
-                    <div key={`msg-${i}`} className='message from-others'>
-                        <div className='message__person-img'>
-                            {data?.photoURL ? (
-                                <img className='person-img' src={data.photoURL} alt='' ></img>
-                            ) : (
-                                <div className='person-icon-wrapper'>
-                                    <FontAwesomeIcon className='person-icon' icon={faUser} />
-                                </div>
-                            )}
-                        </div>
-                        <div className='message__content'>
-                            {messageGroup.map((msg) => msg)}
-                        </div>
-                    </div>
-                );
-                messageGroup = [];
                 i = indexSkipTo - 1;
             }
         }
@@ -439,19 +668,13 @@ function ChatRoom(props) {
                     <div className='chat-info__actions'>
                         <div className='action-list-wrapper'>
                             <div className='action-list'>
-                                {/* <label className='action-item' htmlFor="">
-                                    <span className='action-icon-circle'>
-                                        <FontAwesomeIcon className='action-icon' icon={faPhone} />
+                                <button className='action-item' onClick={() => setIsVideoChatOpen(true)} title="Bắt đầu video call">
+                                    <span className='action-icon-wrapper video-icon'>
+                                        <span className='action-icon-circle'>
+                                            <FontAwesomeIcon className='action-icon' icon={faVideo} />
+                                        </span>
                                     </span>
-                                </label>
-                                <label className='action-item' htmlFor="">
-                                    <span className='action-icon-circle'>
-                                        <FontAwesomeIcon className='action-icon' icon={faVideo} />
-                                    </span>
-                                </label>
-                                <label className='action-item' htmlFor="checkbox-for-chatroom-menu">
-                                    <FontAwesomeIcon className='action-icon' icon={faInfoCircle} />
-                                </label> */}
+                                </button>
                                 <label className='action-item' htmlFor="checkbox-for-chatroom-menu">
                                     <span className='action-icon-wrapper info-icon'>
                                         <span className='action-icon-circle'>
@@ -506,16 +729,61 @@ function ChatRoom(props) {
                 <div className='chat-tools'>
                     <div className='textbox-wrapper'>
                         <div className='textbox'>
+                            {/* Hidden file inputs */}
+                            <input
+                                ref={videoInputRef}
+                                type='file'
+                                accept='video/*'
+                                style={{ display: 'none' }}
+                                onChange={handleVideoUpload}
+                            />
+                            <input
+                                ref={imageInputRef}
+                                type='file'
+                                accept='image/*'
+                                style={{ display: 'none' }}
+                                onChange={handleImageUpload}
+                            />
+                            
+                            {/* Upload buttons */}
+                            <div className='attachment-buttons'>
+                                <button
+                                    className='attachment-btn'
+                                    onClick={() => imageInputRef.current?.click()}
+                                    disabled={isUploading}
+                                    title='Gửi hình ảnh'
+                                >
+                                    <FontAwesomeIcon icon={faImage} />
+                                </button>
+                                <button
+                                    className='attachment-btn'
+                                    onClick={() => videoInputRef.current?.click()}
+                                    disabled={isUploading}
+                                    title='Gửi video'
+                                >
+                                    <FontAwesomeIcon icon={faFileVideo} />
+                                </button>
+                            </div>
+
                             <input
                                 type='text' placeholder='Nhập tin nhắn'
                                 value={inputMessage}
                                 onChange={(e) => handleInputChange(e)}
                                 onKeyPress={(e) => handleInputOnKeyPress(e)}
+                                disabled={isUploading}
                             ></input>
                             <div className='action-button send-btn' onClick={(e) => sendMessage()}>
                                 <FontAwesomeIcon className='action-button__icon send-icon' icon={faAngleRight} />
                             </div>
                         </div>
+                        {isUploading && (
+                            <div className='upload-progress'>
+                                <div className='progress-bar'>
+                                    <div className='progress-fill' style={{ width: `${uploadProgress}%` }}></div>
+                                </div>
+                                <span className='progress-text'>{Math.round(uploadProgress)}%</span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </>
@@ -546,6 +814,13 @@ function ChatRoom(props) {
                     renderEmptyChatRoom()
                 )
             }
+            {isVideoChatOpen && (
+                <VideoChat
+                    roomId={selectedChatRoomID}
+                    userId={user.uid}
+                    onClose={() => setIsVideoChatOpen(false)}
+                />
+            )}
         </div>
     );
 }

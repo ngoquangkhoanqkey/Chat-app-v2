@@ -16,6 +16,8 @@ const useFirestore = (collectionName, condition) => {
     // State:
     const [document, setDocument] = useState([]);
 
+    // const [error, setError] = useState(null);
+
 
     // Side effects:
     useEffect(() => {
@@ -47,7 +49,9 @@ const useFirestore = (collectionName, condition) => {
                         createdAt: (doc.data().createdAt) && (doc.data().createdAt.toDate().toString()),
                         id: doc.id
                     });
+                    
                 });
+                console.log(data);
 
                 setDocument(data);
             });

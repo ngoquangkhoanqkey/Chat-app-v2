@@ -6,6 +6,20 @@ import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
 import { store } from './app/store';
 
+// Suppress Chrome extension errors
+if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+  const originalError = console.error;
+  console.error = (...args) => {
+    if (
+      args[0]?.includes?.('Could not establish connection') ||
+      args[0]?.includes?.('Receiving end does not exist')
+    ) {
+      return;
+    }
+    originalError.apply(console, args);
+  };
+}
+
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>

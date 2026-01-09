@@ -120,6 +120,15 @@ function ModalSearchUserForm(props) {
                             setIsModalSearchUserVisible={setIsModalSearchUserVisible}
                             hanldeGoBackToUserSearchResultList={hanldeGoBackToUserSearchResultList}
                         ></ModalSearchUserFormPage2>
+                         {/* Second form (page 3): */}
+                        <ModalSearchUserFormPage2
+                            userSearchResultList={userSearchResultList}
+                            userSearchResultSelected={userSearchResultSelected}
+                            isModalSearchUserVisible={isModalSearchUserVisible}
+                            setIsModalSearchUserVisible={setIsModalSearchUserVisible}
+                            hanldeGoBackToUserSearchResultList={hanldeGoBackToUserSearchResultList}
+                        ></ModalSearchUserFormPage2>
+                        
                     </div>
                 </div>
 

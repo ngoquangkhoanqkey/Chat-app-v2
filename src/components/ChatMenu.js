@@ -206,6 +206,7 @@ function ChatMenu(props) {
                 createdAt: '',
                 lastActiveAt: ''
             };
+        
             dispatch(setTemporaryRoom(newTemporaryRoom));
 
             // Select the last created chat room.
@@ -371,6 +372,7 @@ function ChatMenu(props) {
             }
         }
     };
+
 
     return (
         <div className='chatmenu'>

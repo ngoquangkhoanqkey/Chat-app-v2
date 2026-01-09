@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import { db, doc, onSnapshot } from '../firebase/config';
 
 
+
 // Work with Cloud Firestore:
 const useRoom = (roomId) => {
     // State:
-    const [document, setDocument] = useState(null);
+    const [document, setDocument] = useState(null);    
 
 
     // Side effects:
