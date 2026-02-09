@@ -54,7 +54,10 @@ const useFirestore = (collectionName, condition) => {
                 console.log(data);
 
                 setDocument(data);
+                console.log(data);
             });
+
+        
 
         // Cleanup function:
         return unsubscribe;

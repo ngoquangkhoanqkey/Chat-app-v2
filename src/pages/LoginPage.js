@@ -21,6 +21,7 @@ import '../styles/scss/pages/LoginPage.scss';
 import Logo from '../assets/images/logo-full.png'
 import fbIcon from '../assets/images/icon_Facebook.png';
 import ggIcon from '../assets/images/icon_Google.png';
+// import sizeText from '../styles/scss/abstracts/_sizeText.scss';
 
 
 function LoginPage(props) {

@@ -200,6 +200,7 @@ function AppButtonForFriendRequest(props) {
         <div className='app-btns for-friend-request'>
             {renderButtons()}
         </div>
+      
     );
 }
 

@@ -81,6 +81,8 @@ function ChatPage(props) {
                         <div className={`chatpage__right-section${isRightSectionVisibleForSmallDevice ? ' visible-for-small-devices' : ' hidden-for-small-devices'}`}>
                             <ChatRoomMenu
                                 handleDisplayChatRoomMenu={handleDisplayChatRoomMenu}
+                               
+
                             ></ChatRoomMenu>
                         </div>
                     </div>
